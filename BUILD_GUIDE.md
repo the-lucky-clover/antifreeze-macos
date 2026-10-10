@@ -67,17 +67,42 @@ You should now see `Models/`, `MonitoringEngine/`, `Storage/`, `Permissions/`,
 1. Still on the target, click the **General** tab.
 2. Under **Minimum Deployments**, set **macOS** to **13.0**.
 
-## Step 6 — Build
+## Step 6 — Link frameworks, set the bridging header, then build
+
+The code uses three Apple frameworks Xcode doesn't link by default, plus
+one C header Swift can't see on its own. Do this **before** you build —
+it prevents three guaranteed red errors.
+
+**Part A — link the three frameworks (60 seconds):**
+
+1. Click the blue **AntiFreeze** project icon → **AntiFreeze** target →
+   **Build Phases** tab.
+2. Open **Link Binary With Libraries** → click the **+** button.
+3. In the search box type `IOKit.framework` → select it → **Add**.
+4. Click **+** again → type `UserNotifications.framework` → select → **Add**.
+5. Click **+** again → type `libsqlite3.tbd` → select → **Add**.
+6. All three should now be in the list. (If one was already there, skip
+   it — no harm done.)
+
+**Part B — point Xcode at the bridging header:**
+
+The process-list collector uses `proc_pidinfo`, which lives in a C-only
+header Swift can't see without help. The header file shipped with the
+source (it came along when you dragged the folder in).
+
+1. Still on the **AntiFreeze** target, click the **Build Settings** tab.
+2. In the search box at the top-right of Build Settings, type `bridging`.
+3. Find **Objective-C Bridging Header** (under "Swift Compiler – General").
+4. Double-click its value field and type exactly:
+   `AntiFreeze/AntiFreeze-Bridging-Header.h`
+5. Press **Enter**.
+
+**Part C — build:**
 
 1. Press **⌘B** (or menu **Product → Build**).
 2. Wait. The first build takes a minute or two.
 
-**If you see "No such module 'SQLite3'":**
-1. Target → **Build Phases** tab → **Link Binary With Libraries** → click **+**.
-2. Type `libsqlite3.tbd`, select it, click **Add**.
-3. Press **⌘B** again.
-
-**Any other red error:** stop, copy the exact text, send it to me verbatim.
+**Any red error:** stop, copy the exact text, send it to me verbatim.
 
 ## Step 7 — Run
 
